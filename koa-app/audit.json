@@ -1,0 +1,26 @@
+{
+    "keepSettings": {
+        "type": 2,
+        "amount": 10
+    },
+    "auditFilename": "audit.json",
+    "hashType": "md5",
+    "extension": "",
+    "files": [
+        {
+            "date": 1704350072683,
+            "name": "/Users/wangks/Documents/yunke/bff-demos/bff-koa/build/logs/access.log.2024-01-04",
+            "hash": "dec859ea1c123e72acd93dad5d9feaef"
+        },
+        {
+            "date": 1704350072684,
+            "name": "/Users/wangks/Documents/yunke/bff-demos/bff-koa/build/logs/bussiness.log.2024-01-04",
+            "hash": "b4d3562f12c293e81fea2b503d54884f"
+        },
+        {
+            "date": 1704350072685,
+            "name": "/Users/wangks/Documents/yunke/bff-demos/bff-koa/build/logs/error.log.2024-01-04",
+            "hash": "fc836e0bb48fa57966271e26acea4cee"
+        }
+    ]
+}

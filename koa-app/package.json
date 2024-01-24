@@ -1,0 +1,42 @@
+{
+  "name": "bff-koa",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "dev": "tsc -p . -w",
+    "build": "./compile-grpc.sh && yarn compile",
+    "compile": "tsc -p .",
+    "run:dev": "node build/worker.js",
+    "run": "NODE_ENV=production node build/worker.js",
+    "run:cluster": "node build/cluster.js"
+  },
+  "dependencies": {
+    "@grpc/grpc-js": "^1.9.14",
+    "@koa/multer": "^3.0.2",
+    "@koa/router": "^12.0.1",
+    "@types/koa": "^2.13.12",
+    "@types/koa-bodyparser": "^5.0.1",
+    "async": "^3.2.5",
+    "cfork": "^1.9.0",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.0",
+    "colorette": "2.0.20",
+    "file-stream-rotator": "^1.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "koa": "^2.15.0",
+    "koa-bodyparser": "^4.4.1",
+    "koa-cookies": "^4.0.2",
+    "lodash": "^4.17.21",
+    "pino": "^8.17.2",
+    "pino-pretty": "^10.3.1",
+    "protobufjs": "^7.2.6",
+    "reflect-metadata": "^0.2.1",
+    "routing-controllers": "^0.10.4",
+    "typescript": "^5.3.3"
+  },
+  "devDependencies": {
+    "grpc-tools": "^1.12.4",
+    "ts-proto": "^1.167.0"
+  }
+}
