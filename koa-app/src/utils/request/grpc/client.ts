@@ -25,7 +25,7 @@ export class BaseGrpcClient {
     logger: Console
 
     getGrpcOptions() {
-        this.grpcOptions = require(path.join(process.cwd(), 'grpc-config.js'))
+        this.grpcOptions = require(path.join(process.cwd(), 'grpc-client-config.js'))
     }
 
     checkStarting(resolve) {
@@ -112,7 +112,7 @@ export class BaseGrpcClient {
 
     clientWaitForReady() {
         return new Promise((resolve, reject) => {
-            this.client.waitForReady(this.deadline || this.grpcOptions.deadline, (error) => {
+            this.client.waitForReady(Date.now() + (this.deadline || this.grpcOptions.deadline), (error) => {
                 if (error) {
                     reject(error)
                 } else {
@@ -142,11 +142,11 @@ export class BaseGrpcClient {
     }
 
     handleMetadata(metadata) {
-        return metadata
+        return metadata || new Metadata()
     }
 
     handleOptions(options) {
-        return options
+        return options || {}
     }
 
     handleSucc<TResp>({ action }) {
@@ -233,7 +233,7 @@ export class BaseGrpcClient {
 
     request<TResp>(opts): Promise<{ response: TResp, metadata: Metadata }> {
         return this.requestBefore(opts)
-            .then(this.raceRequest)
+            .then((args) => this.raceRequest(args))
             .then(this.handleSucc<TResp>(opts))
             .catch(this.handleError(opts))
     }
@@ -248,9 +248,9 @@ export class BaseGrpcClient {
         })
         const call = this.client[action](this.handleMetadata(metadata), this.handleOptions(options), (err, response) => {
             if (err) {
-                _reject(this.handleError(err))
+                _reject(this.handleError({action})(err))
             } else {
-                _resolve(this.handleSucc(response))
+                _resolve(this.handleSucc<TResp>({action})({response, metadata}))
             }
         });
         // callback: (error: grpc.ServiceError | null, response: route_guide_pb.RouteSummary) => void
@@ -273,17 +273,17 @@ export class BaseGrpcClient {
             const call = this.client[action](payload, this.handleMetadata(metadata), this.handleOptions(options));
 
             call.on('error', (error) => {
-                this.handleError(error)
+                this.handleError({action})(error)
                 reject(error)
             })
 
-            call.on('data', function (data) {
+            call.on('data', (data) => {
                 result.push(data)
             })
 
-            call.on('end', function () {
-                resolve(this.handleSucc({
-                    response: result as TResp,
+            call.on('end', () => {
+                resolve(this.handleSucc<TResp>({action})({
+                    response: result,
                     metadata
                 }))
             })
@@ -294,7 +294,7 @@ export class BaseGrpcClient {
 
         let _resolve;
         let _reject;
-        let result;
+        let result = [];
         console.log({
             act: 'grpc begin',
             url: `${action}`,
@@ -309,16 +309,19 @@ export class BaseGrpcClient {
         });
 
         call.on('error', (error) => {
-            this.handleError(error)
+            this.handleError({action})(error)
             _reject(error)
         })
 
-        call.on('data', function (data) {
+        call.on('data', (data) => {
             result.push(data)
         })
 
-        call.on('end', function () {
-            _resolve(this.handleSucc(result))
+        call.on('end', () => {
+            _resolve(this.handleSucc<TResp>({action})({
+                response: result,
+                metadata
+            }))
         })
         return call
     }

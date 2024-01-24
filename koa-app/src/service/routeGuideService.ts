@@ -2,29 +2,21 @@ import fs from 'fs'
 import path from 'path'
 import async from 'async'
 import _ from 'lodash'
-import { credentials } from '@grpc/grpc-js'
-import { RouteGuideClient } from '../grpc-gen/route_guide_pb'
+import { routeGuide } from '../grpc-client-wrap/routeGuideGrpcClient'
 
-const client = new RouteGuideClient('localhost:50051', credentials.createInsecure())
 
 var COORD_FACTOR = 1e7;
 
 export class RouteGuideService {
     async getFeature() {
         try {
-            const result = await new Promise((resolve, reject) => {
-                client.getFeature({
+            const { response } = await routeGuide.getFeature({
+                payload: {
                     latitude: 1,
                     longitude: 2
-                }, (err, response) => {
-                    if (err) {
-                        reject(err)
-                    } else {
-                        resolve(response)
-                    }
-                })
+                }
             })
-            return result
+            return response
         } catch (error) {
             throw error
         }
@@ -32,8 +24,8 @@ export class RouteGuideService {
 
     async listFeatures() {
         try {
-            const result = await new Promise((resolve, reject) => {
-                const call = client.listFeatures({
+            const { response } = await routeGuide.listFeatures({
+                payload: {
                     lo: {
                         latitude: 400000000,
                         longitude: -750000000
@@ -42,20 +34,10 @@ export class RouteGuideService {
                         latitude: 420000000,
                         longitude: -730000000
                     }
-                })
-
-                let result = []
-                call.on('error', reject)
-
-                call.on('data', function (data) {
-                    result.push(data)
-                })
-
-                call.on('end', function () {
-                    resolve(result)
-                })
+                }
             })
-            return result
+
+            return response
         } catch (error) {
             throw error
         }
@@ -73,13 +55,8 @@ export class RouteGuideService {
                     var feature_list = JSON.parse(data);
 
                     var num_points = 10;
-                    var call = client.recordRoute(function (error, stats) {
-                        if (error) {
-                            reject(error);
-                            return;
-                        }
-                        resolve(stats);
-                    });
+
+                    const call = routeGuide.recordRoute({});
                     function pointSender(lat, lng) {
                         /**
                          * Sends the point, then calls the callback after a delay
@@ -101,8 +78,14 @@ export class RouteGuideService {
                         point_senders[i] = pointSender(rand_point.location.latitude,
                             rand_point.location.longitude);
                     }
-                    async.series(point_senders, function () {
+                    async.series(point_senders, async function () {
                         call.end();
+                        try {
+                            const { response } = await call.callback
+                            resolve(response)
+                        } catch (error) {
+                            reject(error)
+                        }
                     });
                 });
             })
@@ -115,55 +98,42 @@ export class RouteGuideService {
 
     async routeChat() {
         try {
-            const result = await new Promise((resolve, reject) => {
-                var call = client.routeChat();
-                let arr = []
-                call.on('data', function (note) {
-                    // console.log('Got message "' + note.message + '" at ' +
-                    //     note.location.latitude + ', ' + note.location.longitude);
-                    arr.push(note)
-                });
+            var call = routeGuide.routeChat({});
 
-                call.on('error', reject)
-
-                call.on('end', () => {
-                    resolve(arr)
-                });
-
-                var notes = [{
-                    location: {
-                        latitude: 0,
-                        longitude: 0
-                    },
-                    message: 'First message'
-                }, {
-                    location: {
-                        latitude: 0,
-                        longitude: 1
-                    },
-                    message: 'Second message'
-                }, {
-                    location: {
-                        latitude: 1,
-                        longitude: 0
-                    },
-                    message: 'Third message'
-                }, {
-                    location: {
-                        latitude: 0,
-                        longitude: 0
-                    },
-                    message: 'Fourth message'
-                }];
-                for (var i = 0; i < notes.length; i++) {
-                    var note = notes[i];
-                    console.log('Sending message "' + note.message + '" at ' +
-                        note.location.latitude + ', ' + note.location.longitude);
-                    call.write(note);
-                }
-                call.end();
-            })
-            return result
+            var notes = [{
+                location: {
+                    latitude: 0,
+                    longitude: 0
+                },
+                message: 'First message'
+            }, {
+                location: {
+                    latitude: 0,
+                    longitude: 1
+                },
+                message: 'Second message'
+            }, {
+                location: {
+                    latitude: 1,
+                    longitude: 0
+                },
+                message: 'Third message'
+            }, {
+                location: {
+                    latitude: 0,
+                    longitude: 0
+                },
+                message: 'Fourth message'
+            }];
+            for (var i = 0; i < notes.length; i++) {
+                var note = notes[i];
+                console.log('Sending message "' + note.message + '" at ' +
+                    note.location.latitude + ', ' + note.location.longitude);
+                call.write(note);
+            }
+            call.end();
+            const { response } = await call.callback
+            return response
         } catch (error) {
             throw error
         }

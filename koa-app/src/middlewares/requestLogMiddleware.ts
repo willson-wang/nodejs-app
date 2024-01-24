@@ -5,7 +5,7 @@ import { Middleware, KoaMiddlewareInterface } from "routing-controllers";
 export class RequestLogMiddleware implements KoaMiddlewareInterface {
     async use(ctx: Context, next: Next): Promise<any> {
         const info = {
-            act: 'req begin',
+            act: 'req start',
             url: ctx.url,
             query: ctx.query
         } as Record<string, any>
