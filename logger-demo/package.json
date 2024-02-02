@@ -1,0 +1,12 @@
+{
+  "name": "logger-demo",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "koa": "^2.15.0",
+    "pino": "^8.17.2",
+    "winston": "^3.11.0"
+  }
+}

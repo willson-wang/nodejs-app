@@ -30,14 +30,14 @@ export class PinoLogger extends BaseLogger {
                 customLevels: {
                     access: 70
                 },
-                transport: {
-                    // target: 'pino-pretty',
-                    target: './pino-pretty-transport',
-                    options: {
-                        colorize: true,
-                        singleLine: false, // 控制台日志单行显示
-                    }
-                },
+                // transport: {
+                //     target: 'pino-pretty',
+                //     // target: './pino-pretty-transport',
+                //     options: {
+                //         colorize: true,
+                //         singleLine: false, // 控制台日志单行显示
+                //     }
+                // },
                 timestamp: () => `,"time":"${new Date(Date.now()).toISOString()}"`,
                 base: undefined,
                 // nestedKey: 'data',

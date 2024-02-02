@@ -24,7 +24,7 @@ export async function initApp(options) {
     console.log(config.jwt, {b: 1, c: 2}, 'config.jwt1111')
 
     logger.info('开始启动服务', '6666')
-    logger.trace('trace日志')
+    logger.trace('trace日志111')
     logger.debug('debug日志')
     logger.warn('warn日志')
     logger.fatal('fatal日志')
@@ -47,8 +47,8 @@ export async function initApp(options) {
 
     useKoaServer(app, {
         defaultErrorHandler: false,
-        controllers: [path.join(__dirname + '/controllers/*.js')],
-        middlewares: [path.join(__dirname + '/middlewares/*.js')]
+        controllers: [path.join(__dirname + '/controllers/*')],
+        middlewares: [path.join(__dirname + '/middlewares/*')]
     })
     
     const port = process.env.PORT || '3000'
